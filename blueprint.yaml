@@ -160,6 +160,8 @@ node_templates:
 
   host:
     type: cloudify.aws.nodes.WindowsInstance
+    instances:
+      deploy: 1
     properties:
       aws_config: *AWS_CONFIG
       image_id: { get_input: server_image_id }
@@ -185,16 +187,24 @@ node_templates:
         type: cloudify.aws.relationships.instance_contained_in_subnet
     interfaces:
       cloudify.interfaces.lifecycle:
-        configure:
-          implementation: scripts/configure.ps1
-          inputs:
-            process:
-              command_prefix: powershell
         start:
           implementation: aws.ec2.instance.start
           inputs:
             start_retry_interval: 30
             private_key_path: { get_input: key_filename }
+
+  software:
+    type: cloudify.nodes.SoftwareComponent
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: host
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: scripts/commands.ps1
+          inputs:
+            process:
+              command_prefix: powershell
 
 outputs:
 
