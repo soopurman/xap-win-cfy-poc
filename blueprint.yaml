@@ -185,6 +185,11 @@ node_templates:
         type: cloudify.aws.relationships.instance_contained_in_subnet
     interfaces:
       cloudify.interfaces.lifecycle:
+        configure:
+          implementation: scripts/configure.ps1
+          inputs:
+            process:
+              command_prefix: powershell
         start:
           implementation: aws.ec2.instance.start
           inputs:
@@ -195,5 +200,5 @@ outputs:
 
   server:
     value:
-      host: { get_attribute: [ host, ip ] }
+      host: { get_attribute: [ host, public_ip_address ] }
       pass: { get_attribute: [ host, password ] }
