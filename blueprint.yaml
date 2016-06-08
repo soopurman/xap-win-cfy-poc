@@ -1,0 +1,199 @@
+tosca_definitions_version: cloudify_dsl_1_2
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.3.1/types.yaml
+  - https://raw.githubusercontent.com/GigaSpaces-ProfessionalServices/cloudify-aws-plugin/1.4-maint/plugin.yaml
+
+inputs:
+
+  aws_access_key_id:
+    type: string
+    description: AWS Access Key ID from IAM console identifying Amazon user who will create new instances.
+
+  aws_secret_access_key:
+    type: string
+    description: AWS Secret Access Key from IAM console authenticating Amazon user who will create new instances.
+
+  ec2_region_name:
+    type: string
+    description: EC2 Region where new instances will be created. Distinct from an availability zone.
+
+  server_image_id:
+    type: string
+    description: ID of AMI to use for creating new instances.
+
+  server_instance_type:
+    type: string
+    description: Machine type to be used for new instances, such as c4.large.
+
+  use_existing_security_group:
+    type: boolean
+    default: true
+    description: If this is false then a new security group will be created.
+
+  existing_security_group_id:
+    type: string
+    default: ''
+    description: ID of AWS Security Group in which new instances will run. Leave blank if a new one is to be created.
+
+  new_security_group_protocol:
+    type: string
+    default: -1
+    description: Policy details for creating new Security Group if necessary. Can be tcp, udp, icmp, or -1 for all.
+
+  new_security_group_from_port:
+    type: string
+    default: None
+    description: Policy details for creating new Security Group if necessary. Beginning value for range of tcp or udp ports to open.
+
+  new_security_group_to_port:
+    type: string
+    default: None
+    description: Policy details for creating new Security Group if necessary. Ending value for range of tcp or udp ports to open.
+
+  new_security_group_cidr:
+    type: string
+    default: 0.0.0.0/0
+    description: Policy details for creating new Security Group if necessary. IP block from which to allow access.
+
+  use_existing_subnet:
+    type: boolean
+    default: true
+    description: If this is false then a new subnet will be created.
+
+  existing_subnet_id:
+    type: string
+    default: ''
+    description: ID of AWS Subnet in which new instances will run. Leave blank if a new one is to be created.
+
+  new_subnet_avail_zone:
+    type: string
+    default: ''
+    description: Availability Zone in which to create new subnet if necessary.
+
+  new_subnet_cidr:
+    type: string
+    default: ''
+    description: IP block to define new subnet if necessary.
+
+  use_existing_vpc:
+    type: boolean
+    default: true
+    description: If this is false then a new VPC will be created.
+
+  existing_vpc_id:
+    type: string
+    default: ''
+    description: ID of VPC in which new instances will run. Leave blank if a new one is to be created.
+
+  new_vpc_cidr:
+    type: string
+    default: ''
+    description: IP block to define new VPC if necessary.
+
+  use_existing_keypair:
+    type: boolean
+    default: true
+    description: If this is false then a new key will be created in AWS and the PEM file downloaded.
+
+  keypair_name:
+    type: string
+    default: cloudify_keypair
+    description: AWS name for key to either use or create.
+
+  key_filename:
+    type: string
+    default: ~/cloudify_keypair.pem
+    description: Local path on Cloudify host running this blueprint where private key will either be loaded from or downloaded to.
+
+dsl_definitions:
+  aws_config: &AWS_CONFIG
+    aws_access_key_id: { get_input: aws_access_key_id }
+    aws_secret_access_key: { get_input: aws_secret_access_key }
+    ec2_region_name: { get_input: ec2_region_name }
+
+node_templates:
+
+  keypair:
+    type: cloudify.aws.nodes.KeyPair
+    properties:
+      aws_config: *AWS_CONFIG
+      use_external_resource: { get_input: use_existing_keypair }
+      resource_id: { get_input: keypair_name }
+      private_key_path: { get_input: key_filename }
+
+  vpc:
+    type: cloudify.aws.nodes.VPC
+    properties:
+      aws_config: *AWS_CONFIG
+      use_external_resource: { get_input: use_existing_vpc }
+      resource_id: { get_input: existing_vpc_id }
+      cidr_block: { get_input: new_vpc_cidr }
+
+  subnet:
+    type: cloudify.aws.nodes.Subnet
+    properties:
+      aws_config: *AWS_CONFIG
+      use_external_resource: { get_input: use_existing_subnet }
+      resource_id: { get_input: existing_subnet_id }
+      cidr_block: { get_input: new_subnet_cidr }
+      availability_zone: { get_input: new_subnet_avail_zone }
+    relationships:
+      - type: cloudify.aws.relationships.subnet_contained_in_vpc
+        target: vpc
+
+  security_group:
+    type: cloudify.aws.nodes.SecurityGroup
+    properties:
+      aws_config: *AWS_CONFIG
+      use_external_resource: { get_input: use_existing_security_group }
+      resource_id: { get_input: existing_security_group_id }
+      description: AWS Security Group to create and/or use
+      rules:
+        - ip_protocol: { get_input: new_security_group_protocol }
+          from_port: { get_input: new_security_group_from_port }
+          to_port: { get_input: new_security_group_to_port }
+          cidr_ip: { get_input: new_security_group_cidr }
+    relationships:
+      - type: cloudify.aws.relationships.security_group_contained_in_vpc
+        target: vpc
+
+  host:
+    type: cloudify.aws.nodes.WindowsInstance
+    properties:
+      aws_config: *AWS_CONFIG
+      image_id: { get_input: server_image_id }
+      instance_type: { get_input: server_instance_type }
+      agent_config:
+        user: Administrator
+      parameters:
+        user_data: |
+          <script>
+          call winrm quickconfig -q
+          call winrm set winrm/config @{MaxTimeoutms="1800000"}
+          call winrm set winrm/config/winrs @{MaxMemoryPerShellMB="300";MaxShellsPerUser="2147483647"}
+          call winrm set winrm/config/service @{AllowUnencrypted="true";MaxConcurrentOperationsPerUser="4294967295"}
+          call winrm set winrm/config/service/auth @{Basic="true"}
+          call netsh advfirewall firewall add rule name="WinRM 5985" protocol=TCP dir=in localport=5985 action=allow
+          </script>
+    relationships:
+      - target: keypair
+        type: cloudify.aws.relationships.instance_connected_to_keypair
+      - target: security_group
+        type: cloudify.aws.relationships.instance_connected_to_security_group
+      - target: subnet
+        type: cloudify.aws.relationships.instance_contained_in_subnet
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: aws.ec2.instance.start
+          inputs:
+            start_retry_interval: 30
+            private_key_path: { get_input: key_filename }
+
+outputs:
+
+  server:
+    value:
+      host: { get_attribute: [ host, ip ] }
+      pass: { get_attribute: [ host, password ] }
