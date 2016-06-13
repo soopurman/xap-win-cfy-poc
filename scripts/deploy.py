@@ -1,4 +1,3 @@
-import sys
 import datetime
 import urllib
 import zipfile
@@ -8,19 +7,18 @@ dir = "C:\Users\Administrator\Downloads\\"
 log = dir + "cfy-deployment.txt"
 
 fo = open(log, "a", 1)
-fo.write("Begin POC code\n")
-fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + "\n")
-fo.write(ctx.deployment.id + "\n")
-fo.write(" ".join(sys.argv) + "\n")
+fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Beginning deployment\n")
 
-for arg in sys.argv[1:]:
-    zf = dir + arg.split('/')[-1]
-    fo.write("Downloading " + arg + "\n")
-    urllib.urlretrieve(arg, zf)
-    zip = zipfile.ZipFile(zf)
-    fo.write("Unzipping " + zf + "\n")
-    zip.extractall(zf.split(".zip")[0])
+for name in ctx.node.properties['downloads_names'].split():
+    zf = name + ctx.node.properties['downloads_rev-ext']
+    dst = dir + zf
+    src = ctx.node.properties['downloads_base'] + zf
+    fo.write("Downloading " + src + "\n")
+    urllib.urlretrieve(src, dst)
+    zip = zipfile.ZipFile(dst)
+    fo.write("Unzipping " + dst + "\n")
+    zip.extractall(dir + name)
     zip.close()
 
-fo.write("End POC code\n")
+fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Completed deployment\n")
 fo.close()

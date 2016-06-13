@@ -106,17 +106,17 @@ inputs:
     default: ~/cloudify_keypair.pem
     description: Local path on Cloudify host running this blueprint where private key will either be loaded from or downloaded to.
 
-  code_zip_1:
+  downloads_base:
     type: string
-    description: URL to first custom code package zip file to download and extract
+    description: base URL of custom code package files to download and extract ("http://www.example.com/repository/")
 
-  code_zip_2:
+  downloads_names:
     type: string
-    description: URL to second custom code package zip file to download and extract
+    description: space separated list of names differentiating the custom code packagefiles to download and extract ("pkg1 pkg2 pkg3")
 
-  code_zip_3:
+  downloads_rev-ext:
     type: string
-    description: URL to third custom code package zip file to download and extract
+    description: release version and format of custom code package files to download and extract ("_v1.0.zip")
 
 dsl_definitions:
   aws_config: &AWS_CONFIG
@@ -210,13 +210,13 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: host
+    properties:
+        downloads_base: { get_input: downloads_base }
+        downloads_names: { get_input: downloads_names }
+        downloads_rev-ext: { get_input: downloads_rev-ext }
     interfaces:
       cloudify.interfaces.lifecycle:
-        start:
-          implementation: scripts/deploy.py
-          inputs:
-            process:
-              args: [{ get_input: code_zip_1 }, { get_input: code_zip_2 }, { get_input: code_zip_3 }]
+        start: scripts/deploy.py
 
 outputs:
 

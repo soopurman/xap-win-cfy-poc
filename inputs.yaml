@@ -34,6 +34,6 @@ keypair_name: cloudify
 key_filename: /tmp/cloudify.pem
 
 # needs values for URLs to custom code zip files to download and extract on all instances launched
-code_zip_1: 
-code_zip_2: 
-code_zip_3: 
+downloads_base: 
+downloads_names: 
+downloads_rev-ext: 
