@@ -106,6 +106,18 @@ inputs:
     default: ~/cloudify_keypair.pem
     description: Local path on Cloudify host running this blueprint where private key will either be loaded from or downloaded to.
 
+  code_zip_1:
+    type: string
+    description: URL to first custom code package zip file to download and extract
+
+  code_zip_2:
+    type: string
+    description: URL to second custom code package zip file to download and extract
+
+  code_zip_3:
+    type: string
+    description: URL to third custom code package zip file to download and extract
+
 dsl_definitions:
   aws_config: &AWS_CONFIG
     aws_access_key_id: { get_input: aws_access_key_id }
@@ -201,10 +213,10 @@ node_templates:
     interfaces:
       cloudify.interfaces.lifecycle:
         start:
-          implementation: scripts/commands.ps1
+          implementation: scripts/deploy.py
           inputs:
             process:
-              command_prefix: powershell
+              args: [{ get_input: code_zip_1 }, { get_input: code_zip_2 }, { get_input: code_zip_3 }]
 
 outputs:
 
