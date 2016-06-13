@@ -210,13 +210,14 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: host
-    properties:
-        downloads_base: { get_input: downloads_base }
-        downloads_names: { get_input: downloads_names }
-        downloads_rev-ext: { get_input: downloads_rev-ext }
     interfaces:
       cloudify.interfaces.lifecycle:
-        start: scripts/deploy.py
+        start:
+          implementation: scripts/deploy.py
+          inputs:
+            downloads_base: { get_input: downloads_base }
+            downloads_names: { get_input: downloads_names }
+            downloads_rev-ext: { get_input: downloads_rev-ext }
 
 outputs:
 

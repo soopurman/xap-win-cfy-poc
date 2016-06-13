@@ -1,7 +1,7 @@
 import datetime
 import urllib
 import zipfile
-from cloudify import ctx
+from cloudify.state import ctx_parameters as inputs
 
 dir = "C:\Users\Administrator\Downloads\\"
 log = dir + "cfy-deployment.txt"
@@ -9,10 +9,10 @@ log = dir + "cfy-deployment.txt"
 fo = open(log, "a", 1)
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Beginning deployment\n")
 
-for name in ctx.node.properties['downloads_names'].split():
-    zf = name + ctx.node.properties['downloads_rev-ext']
+for name in inputs['downloads_names'].split():
+    zf = name + inputs['downloads_rev-ext']
     dst = dir + zf
-    src = ctx.node.properties['downloads_base'] + zf
+    src = inputs['downloads_base'] + zf
     fo.write("Downloading " + src + "\n")
     urllib.urlretrieve(src, dst)
     zip = zipfile.ZipFile(dst)
