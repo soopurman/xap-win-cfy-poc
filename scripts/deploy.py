@@ -4,7 +4,7 @@ import urllib
 import zipfile
 from cloudify import ctx
 
-fo = open("C:\Users\Administrator\Desktop\cfy-deployment.txt", "a")
+fo = open("C:\Users\Administrator\Desktop\cfy-deployment.txt", "a", 1)
 fo.write("Begin POC code\n")
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + "\n")
 fo.write(ctx.deployment.id + "\n")
