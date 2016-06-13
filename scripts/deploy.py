@@ -10,7 +10,7 @@ fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + "\n")
 fo.write(ctx.target.instance.id + "\n")
 
 for arg in sys.argv[1:]:
-    zf = "C:\Users\Administrator\Downloads\" + arg.split('/')[-1]
+    zf = "C:\Users\Administrator\Downloads\\" + arg.split('/')[-1]
     fo.write("Downloading " + arg + "\n")
     urllib.urlretrieve(arg, zf)
     zip = zipfile.ZipFile(zf)
