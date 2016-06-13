@@ -8,6 +8,7 @@ fo = open("C:\Users\Administrator\Desktop\cfy-deployment.txt", "a", 1)
 fo.write("Begin POC code\n")
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + "\n")
 fo.write(ctx.deployment.id + "\n")
+fo.write(" ".join(sys.argv) + "\n")
 
 for arg in sys.argv[1:]:
     zf = "C:\Users\Administrator\Downloads\\" + arg.split('/')[-1]
