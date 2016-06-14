@@ -20,13 +20,13 @@ fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Beginning dep
 
 for name in inputs['downloads_names'].split():
     zf = name + inputs['downloads_rev-ext']
-    dst = dir + zf
+    dst = os.path.normcase(dir + "/" + zf)
     src = inputs['downloads_base'] + zf
     fo.write("Downloading " + src + "\n")
     urllib.urlretrieve(src, dst)
     zip = zipfile.ZipFile(dst)
     fo.write("Unzipping " + dst + "\n")
-    zip.extractall(dir + name)
+    zip.extractall(os.path.normcase(dir + "/" + name))
     zip.close()
 
 urllib.urlretrieve(inputs['downloads_base'] + license, os.path.normcase(lic_dir + "/" + license))

@@ -16,4 +16,4 @@ url = "jini://*/*/" + space + "?locators=" + xap_master_ip + "&groups=" + group
 opts = ["NIO", "100"]
 DETACHED_PROCESS = 0x00000008
 
-subprocess.Popen([exe, url] + opts, shell=False, cwd=dir+app_name, stdin=None, stdout=open(app_out, 'a'), stderr=open(app_err, 'a'), creationflags=DETACHED_PROCESS)
+subprocess.Popen([exe, url] + opts, shell=False, cwd=os.path.normcase(dir + "/" + app_name), stdin=None, stdout=open(app_out, 'a'), stderr=open(app_err, 'a'), creationflags=DETACHED_PROCESS)
