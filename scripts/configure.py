@@ -7,7 +7,7 @@ from cloudify.state import ctx_parameters as inputs
 dir = "C:\GigaSpaces\\" + ctx.instance.id + "\\"
 log = dir + "cfy-deployment.txt"
 license = "xap-license.txt"
-lic-dir = r"C:\GigaSpaces\XAP.NET-11.0.0-x64\Runtime"
+lic_dir = r"C:\GigaSpaces\XAP.NET-11.0.0-x64\Runtime"
 
 fo = open(log, "a", 1)
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Beginning deployment\n")
@@ -23,7 +23,7 @@ for name in inputs['downloads_names'].split():
     zip.extractall(dir + name)
     zip.close()
 
-urllib.urlretrieve(inputs['downloads_base'] + license, lic-dir + "\\" + license)
+urllib.urlretrieve(inputs['downloads_base'] + license, lic_dir + "\\" + license)
 
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Completed deployment\n")
 fo.close()
