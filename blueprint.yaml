@@ -118,6 +118,22 @@ inputs:
     type: string
     description: release version and format of custom code package files to download and extract ("_v1.0.zip")
 
+  xap_master_ip:
+    type: string
+    description: Private IP address of the XAP.net master server to connect to.
+
+  space:
+    type: string
+    description: The XAP space on the master the workers should connect to.
+
+  group:
+    type: string
+    description: The XAP group on the master the workers should connect to.
+
+  app_name:
+    type: string
+    description: Name of app folder and matching executable to launch on worker instances. Should be one of the tokens from downloads_names above.
+
 dsl_definitions:
   aws_config: &AWS_CONFIG
     aws_access_key_id: { get_input: aws_access_key_id }
@@ -212,12 +228,19 @@ node_templates:
         target: host
     interfaces:
       cloudify.interfaces.lifecycle:
-        start:
-          implementation: scripts/deploy.py
+        configure:
+          implementation: scripts/configure.py
           inputs:
             downloads_base: { get_input: downloads_base }
             downloads_names: { get_input: downloads_names }
             downloads_rev-ext: { get_input: downloads_rev-ext }
+        start:
+          implementation: scripts/start.py
+          inputs:
+            app_name: { get_input: app_name }
+            space: { get_input: space }
+            xap_master_ip: { get_input: xap_master_ip }
+            group: { get_input: group }
 
 outputs:
 

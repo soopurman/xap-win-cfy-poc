@@ -37,3 +37,9 @@ key_filename: /tmp/cloudify.pem
 downloads_base: 
 downloads_names: 
 downloads_rev-ext: 
+
+# Private IP address of the XAP.net master server and the space and group for the given worker app to connect to
+xap_master_ip: 
+space: 
+group: 
+app_name: 
