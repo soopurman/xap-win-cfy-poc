@@ -1,13 +1,19 @@
+import os
 import datetime
 import urllib
 import zipfile
 from cloudify import ctx
 from cloudify.state import ctx_parameters as inputs
 
-dir = "C:\GigaSpaces\\" + ctx.instance.id + "\\"
-log = dir + "cfy-deployment.txt"
+dir = "C:\GigaSpaces\\" + ctx.instance.id
+log = dir + "\cfy-deployment.txt"
 license = "xap-license.txt"
 lic_dir = r"C:\GigaSpaces\XAP.NET-11.0.0-x64\Runtime"
+
+try:
+    os.makedirs(dir)
+except os.error:
+    pass
 
 fo = open(log, "a", 1)
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Beginning deployment\n")
