@@ -5,10 +5,10 @@ import zipfile
 from cloudify import ctx
 from cloudify.state import ctx_parameters as inputs
 
-dir = "C:\GigaSpaces\\" + ctx.instance.id
-log = dir + "\cfy-deployment.txt"
+dir = os.path.normcase("C:/GigaSpaces/" + ctx.instance.id)
+log = os.path.normcase(dir + "/cfy-deployment.txt")
 license = "xap-license.txt"
-lic_dir = r"C:\GigaSpaces\XAP.NET-11.0.0-x64\Runtime"
+lic_dir = os.path.normcase("C:/GigaSpaces/XAP.NET-11.0.0-x64/Runtime")
 
 try:
     os.makedirs(dir)
@@ -29,7 +29,7 @@ for name in inputs['downloads_names'].split():
     zip.extractall(dir + name)
     zip.close()
 
-urllib.urlretrieve(inputs['downloads_base'] + license, lic_dir + "\\" + license)
+urllib.urlretrieve(inputs['downloads_base'] + license, os.path.normcase(lic_dir + "/" + license))
 
 fo.write(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + " Completed deployment\n")
 fo.close()
