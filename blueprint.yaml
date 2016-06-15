@@ -221,8 +221,10 @@ node_templates:
             start_retry_interval: 30
             private_key_path: { get_input: key_filename }
 
-  software:
+  worker:
     type: cloudify.nodes.SoftwareComponent
+    instances:
+      deploy: 1
     relationships:
       - type: cloudify.relationships.contained_in
         target: host
